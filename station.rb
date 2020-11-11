@@ -3,30 +3,34 @@ require_relative './line_stop'
 class Station
   attr_reader :name, :line_stops
 
-  class << self
-    def create line_code, line_num, name, start_date
+  class Map
+    def add line_code, line_num, name, start_date
       @station_pool ||= {}
 
       line_stop = LineStop.new(line_code, line_num, start_date)
-      station = get_station(name)
+      station = find_or_create_station(name)
       station.add_line_stop(line_stop)
       station
     end
 
-    def connect station_a, station_b
-      station_a.add_neighbor(station_b)
-      station_b.add_neighbor(station_a)
-    end
-
-    def get_station name
+    def find_or_create_station name
       @station_pool ||= {}
 
       if !@station_pool[name]
-        @station_pool[name] = self.new(name)
+        @station_pool[name] = Station.new(name)
       end
       @station_pool[name]
     end
-    private :get_station
+    private :find_or_create_station
+
+    def find_station name
+      @station_pool[name]
+    end
+  end
+
+  def self.connect station_a, station_b
+    station_a.add_neighbor(station_b)
+    station_b.add_neighbor(station_a)
   end
 
   def initialize name
@@ -34,7 +38,6 @@ class Station
     @neighbor_stations = []
     @line_stops = []
   end
-  private :initialize
 
   def add_neighbor station
     if ! @neighbor_stations.find {|s| s.name == station.name}
