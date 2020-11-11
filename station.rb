@@ -1,7 +1,7 @@
 require_relative './line_stop'
 
 class Station
-  attr_reader :name
+  attr_reader :name, :line_stops
 
   class << self
     def create line_code, line_num, name, start_date
@@ -43,7 +43,10 @@ class Station
   end
 
   def add_line_stop stop
-    @line_stops << stop
+    exists = @line_stops.find do |s|
+      s.line_code == stop.line_code && s.line_number == stop.line_number
+    end
+    @line_stops << stop unless exists
   end
 
   def get_neighbors
