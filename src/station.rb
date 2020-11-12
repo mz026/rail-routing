@@ -58,4 +58,10 @@ class Station
   def connections
     @connections
   end
+
+  def station_code line_code
+    l = @line_stops.find {|l| l.line_code == line_code}
+    return nil unless l
+    "#{l.line_code}#{l.line_number}"
+  end
 end
