@@ -84,6 +84,30 @@ describe Router do
         [map.find_station('station4'), 'A'],
       ])
       expect(time).to eq(15)
+
+      plan, time = router.time_route(
+        from: 'station1',
+        to: 'station4',
+        line_weight_map: { 'A' => 5, 'B' => 2 },
+        line_changing_cost: 3
+      )
+      expect(plan).to eq([
+        [map.find_station('station1'), nil],
+        [map.find_station('station2'), 'A'],
+        [map.find_station('station4'), 'B'],
+      ])
+      expect(time).to eq(10)
+    end
+    it 'returns [nil, nil] if no suitable route' do
+      map.add('C', 1, 'unlinked', date)
+      plan, time = router.time_route(
+        from: 'station1',
+        to: 'unlinked',
+        line_weight_map: { 'A' => 5, 'B' => 10, 'C' => 1 },
+        line_changing_cost: 8
+      )
+      expect(plan).to be_nil
+      expect(time).to be_nil
     end
   end
 end
