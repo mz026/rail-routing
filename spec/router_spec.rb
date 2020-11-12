@@ -35,5 +35,20 @@ describe Router do
         map.find_station('B3'),
       ])
     end
+    it 'returns nil if no suitable plan was found' do
+      map.add('C', 1, 'C1', date)
+      plan = router.route(from: 'A1', to: 'C1')
+
+      expect(plan).to be_nil
+    end
+    it 'raises if from or to station not found' do
+      expect {
+        router.route(from: 'UNKNOWN', to: 'B3')
+      }.to raise_error(Router::StationNotFound)
+
+      expect {
+        router.route(from: 'A1', to: 'UNKNOWN')
+      }.to raise_error(Router::StationNotFound)
+    end
   end
 end

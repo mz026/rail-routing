@@ -1,4 +1,5 @@
 class Router
+  class StationNotFound < StandardError; end
   class SearchQueue
     def initialize
       @q = []
@@ -24,14 +25,21 @@ class Router
   end
 
   def route from:, to:
-    from_station = @station_map.find_station(from)
-    to_station = @station_map.find_station(to)
+    from_station = find_station!(@station_map, from)
+    to_station = find_station!(@station_map, to)
 
     hit_item = bfs(from_station, to_station)
     return nil unless hit_item
 
     list_plan(hit_item)
   end
+
+  def find_station! map, name
+    s = map.find_station(name)
+    raise StationNotFound, "Station `#{name}` can not be found in the given map" unless s
+    s
+  end
+  private :find_station!
 
   def bfs from_station, to_station
     searched_station_map = { from_station => true }
