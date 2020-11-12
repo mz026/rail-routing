@@ -1,5 +1,5 @@
-require_relative '../station'
-require_relative '../router'
+require_relative '../src/station'
+require_relative '../src/router'
 
 describe Router do
   describe '::new(station_map)' do

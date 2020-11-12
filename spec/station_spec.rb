@@ -1,4 +1,4 @@
-require_relative '../station'
+require_relative '../src/station'
 
 describe Station do
   describe 'Map::add(line_code, line_num, name, start_date)' do
