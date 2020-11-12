@@ -13,8 +13,18 @@ arr = CSV.parse(File.read('./assets/StationMap.csv'))[1..-1]
 map = MapBuilder.new.build(arr)
 
 router = Router.new(map)
-plan = router.route(from: from, to: to)
+plan, time = router.time_route(
+  from: from,
+  to: to,
+  line_weight_map: {
+    'NS' => 12,
+    'NE' => 12,
+    '__default' => 10,
+  },
+  line_changing_cost: 15
+)
 
+puts "time: #{time}"
 plan.each_with_index do |st, i|
   station, line_code = st
   line_code = plan[i + 1][1] unless line_code
