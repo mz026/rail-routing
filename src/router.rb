@@ -126,7 +126,7 @@ class Router
   private :find_min_unprocessed_station
 
   def calculate_cost current_station_data, via_line, line_weight_map, line_changing_cost
-    c = current_station_data[:cost] + line_weight_map[via_line]
+    c = current_station_data[:cost] + (line_weight_map[via_line] || line_weight_map['__default'])
     if current_station_data[:from_line] &&
         current_station_data[:from_line] != via_line
       c += line_changing_cost

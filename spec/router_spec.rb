@@ -84,11 +84,26 @@ describe Router do
         [map.find_station('station4'), 'A'],
       ])
       expect(time).to eq(15)
-
+    end
+    it 'considers line changing cost' do
       plan, time = router.time_route(
         from: 'station1',
         to: 'station4',
         line_weight_map: { 'A' => 5, 'B' => 2 },
+        line_changing_cost: 3
+      )
+      expect(plan).to eq([
+        [map.find_station('station1'), nil],
+        [map.find_station('station2'), 'A'],
+        [map.find_station('station4'), 'B'],
+      ])
+      expect(time).to eq(10)
+    end
+    it 'allows default weight by key `__default`' do
+      plan, time = router.time_route(
+        from: 'station1',
+        to: 'station4',
+        line_weight_map: { 'A' => 5, '__default' => 2 },
         line_changing_cost: 3
       )
       expect(plan).to eq([
