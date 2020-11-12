@@ -1,7 +1,7 @@
 require_relative './line_stop'
 
 class Station
-  attr_reader :name, :line_stops
+  attr_reader :name, :connections
 
   class Map
     def add line_code, line_num, name, start_date
@@ -53,10 +53,6 @@ class Station
       s.line_code == stop.line_code && s.line_number == stop.line_number
     end
     @line_stops << stop unless exists
-  end
-
-  def connections
-    @connections
   end
 
   def station_code line_code

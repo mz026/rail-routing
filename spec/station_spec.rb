@@ -49,9 +49,9 @@ describe Station do
       ])
     end
     it 'reflects line stops' do
-      expect(create_hub(map).line_stops.map {|l| [l.line_code, l.line_number]}).to match_array([
-        ['L1', 2], ['L2', 2]
-      ])
+      hub = create_hub(map)
+      expect(hub.station_code('L1')).to eq('L12')
+      expect(hub.station_code('L2')).to eq('L22')
     end
   end
 
