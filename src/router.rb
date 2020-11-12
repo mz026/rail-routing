@@ -77,4 +77,67 @@ class Router
     plan
   end
   private :list_plan
+
+  def time_route from:, to:, line_weight_map:, line_changing_cost:
+    from_station = find_station!(@station_map, from)
+    to_station = find_station!(@station_map, to)
+
+    dijkstra(from_station, to_station, line_weight_map, line_changing_cost)
+  end
+
+  def dijkstra from_station, to_station, line_weight_map, line_changing_cost
+    d_map = {
+      from_station => { parent: nil, cost: 0, from_line: nil, finished: false }
+    }
+
+    station = find_min_unprocessed_station(d_map)
+    while station && !(d_map[to_station.name] && d_map[to_station.name][:finished])
+      station_data = d_map[station]
+      station.connections.each do |c|
+        cost = calculate_cost(station_data, c.line_code, line_weight_map, line_changing_cost)
+        next if d_map[c.station] && d_map[c.station][:cost] < cost
+
+        d_map[c.station] = {
+          parent: station,
+          cost: cost,
+          from_line: c.line_code,
+          finished: false
+        }
+      end
+      station_data[:finished] = true
+      station = find_min_unprocessed_station(d_map)
+    end
+
+    [
+      calculate_path(d_map, to_station),
+      d_map[to_station][:cost]
+    ]
+  end
+
+  def find_min_unprocessed_station d_map
+    unfinished = d_map.to_a.filter {|_, data| !data[:finished]}
+    return nil if unfinished.empty?
+    unfinished.min_by {|_, data| data[:cost]}[0]
+  end
+
+  def calculate_cost current_station_data, via_line, line_weight_map, line_changing_cost
+    c = current_station_data[:cost] + line_weight_map[via_line]
+    if current_station_data[:from_line] &&
+        current_station_data[:from_line] != via_line
+      c += line_changing_cost
+    end
+    c
+  end
+
+  def calculate_path d_map, station
+    path = []
+    current_station = station
+
+    while current_station
+      current_data = d_map[current_station]
+      path.unshift([current_station, current_data[:from_line]])
+      current_station = current_data[:parent]
+    end
+    path
+  end
 end

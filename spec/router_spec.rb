@@ -51,4 +51,39 @@ describe Router do
       }.to raise_error(Router::StationNotFound)
     end
   end
+
+  describe '#time_route(from:, to:, line_weight_map:, line_changing_cost:)' do
+    let(:date) { '10 March 1990' }
+    let(:router) { Router.new(map) }
+    let(:map) do
+      m = Station::Map.new
+      a1 = m.add('A', 1, 'station1', date)
+      a2 = m.add('A', 2, 'station2', date)
+      a3 = m.add('A', 3, 'station3', date)
+      a4 = m.add('A', 4, 'station4', date)
+      Station.connect(a1, a2, 'A')
+      Station.connect(a2, a3, 'A')
+      Station.connect(a3, a4, 'A')
+
+      b2 = m.add('B', 2, 'station2', date)
+      b4 = m.add('B', 4, 'station4', date)
+      Station.connect(b2, b4, 'B')
+      m
+    end
+    it 'calculates route based on weights' do
+      plan, time = router.time_route(
+        from: 'station1',
+        to: 'station4',
+        line_weight_map: { 'A' => 5, 'B' => 10 },
+        line_changing_cost: 8
+      )
+      expect(plan).to eq([
+        [map.find_station('station1'), nil],
+        [map.find_station('station2'), 'A'],
+        [map.find_station('station3'), 'A'],
+        [map.find_station('station4'), 'A'],
+      ])
+      expect(time).to eq(15)
+    end
+  end
 end
