@@ -53,7 +53,7 @@ class Router
         break
       end
 
-      item.station.get_neighbors.each do |neb_station|
+      item.station.neighbors.each do |neb_station|
         next if searched_station_map[neb_station]
         searched_station_map[neb_station] = true
         q.enqueue(SearchItem.new(neb_station, item))

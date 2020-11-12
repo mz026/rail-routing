@@ -52,7 +52,7 @@ class Station
     @line_stops << stop unless exists
   end
 
-  def get_neighbors
+  def neighbors
     @neighbor_stations
   end
 end

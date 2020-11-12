@@ -32,16 +32,16 @@ describe Station do
 
       s2
     end
-    it 'connects the stations and reflects on the #get_neighbors' do
+    it 'connects the stations and reflects on the #neighbors' do
       s1 = map.add('NS', 1, 'Jurong East', date)
       s2 = map.add('NS', 2, 'Bukit Batok', date)
       Station.connect(s1, s2)
 
-      expect(s1.get_neighbors).to include(s2)
-      expect(s2.get_neighbors).to include(s1)
+      expect(s1.neighbors).to include(s2)
+      expect(s2.neighbors).to include(s1)
     end
     it 'returns the neighbor stations' do
-      expect(create_hub(map).get_neighbors.map(&:name)).to match_array(['A', 'C', 'X', 'Z'])
+      expect(create_hub(map).neighbors.map(&:name)).to match_array(['A', 'C', 'X', 'Z'])
     end
     it 'reflects line stops' do
       expect(create_hub(map).line_stops.map {|l| [l.line_code, l.line_number]}).to match_array([
