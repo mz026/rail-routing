@@ -28,21 +28,24 @@ class Station
     end
   end
 
-  def self.connect station_a, station_b
-    station_a.add_neighbor(station_b)
-    station_b.add_neighbor(station_a)
+  Connection = Struct.new(:station, :line_code)
+
+  def self.connect station_a, station_b, line_code
+    station_a.add_connection(station_b, line_code)
+    station_b.add_connection(station_a, line_code)
   end
 
   def initialize name
     @name = name
-    @neighbor_stations = []
+    @connections = []
     @line_stops = []
   end
 
-  def add_neighbor station
-    if ! @neighbor_stations.find {|s| s.name == station.name}
-      @neighbor_stations << station
+  def add_connection station, line_code
+    existing_conn = @connections.find do |c|
+      c.line_code == line_code && c.station.name == station.name
     end
+    @connections << Connection.new(station, line_code) unless existing_conn
   end
 
   def add_line_stop stop
@@ -52,7 +55,7 @@ class Station
     @line_stops << stop unless exists
   end
 
-  def neighbors
-    @neighbor_stations
+  def connections
+    @connections
   end
 end

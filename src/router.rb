@@ -18,7 +18,7 @@ class Router
     end
   end
 
-  SearchItem = Struct.new(:station, :from_item)
+  SearchItem = Struct.new(:station, :line_code, :from_item)
 
   def initialize station_map
     @station_map = station_map
@@ -44,8 +44,9 @@ class Router
   def bfs from_station, to_station
     searched_station_map = { from_station => true }
     q = SearchQueue.new
-    q.enqueue(SearchItem.new(from_station, nil))
     hit = nil
+
+    q.enqueue(SearchItem.new(from_station, nil, nil))
     while q.has_item?
       item = q.dequeue
       if item.station == to_station
@@ -53,10 +54,12 @@ class Router
         break
       end
 
-      item.station.neighbors.each do |neb_station|
+      item.station.connections.each do |conn|
+        neb_station = conn.station
+        line_code = conn.line_code
         next if searched_station_map[neb_station]
         searched_station_map[neb_station] = true
-        q.enqueue(SearchItem.new(neb_station, item))
+        q.enqueue(SearchItem.new(neb_station, line_code, item))
       end
     end
 
@@ -68,7 +71,7 @@ class Router
     plan = []
     item = hit_item
     while item
-      plan.unshift item.station
+      plan.unshift([item.station, item.line_code])
       item = item.from_item
     end
     plan
