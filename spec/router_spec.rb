@@ -73,68 +73,54 @@ describe Router do
       a2 = m.add('A', 2, 'station2')
       a3 = m.add('A', 3, 'station3')
       a4 = m.add('A', 4, 'station4')
-      Station.connect(a1, a2, 'A')
-      Station.connect(a2, a3, 'A')
-      Station.connect(a3, a4, 'A')
+      Station.connect(a1, a2)
+      Station.connect(a2, a3)
+      Station.connect(a3, a4)
 
       b2 = m.add('B', 2, 'station2')
       b4 = m.add('B', 4, 'station4')
-      Station.connect(b2, b4, 'B')
+      Station.connect(b2, b4)
       m
     end
     it 'calculates route based on weights' do
-      plan, time = router.time_route(
+      results = router.time_route(
         from: 'station1',
         to: 'station4',
         line_weight_map: { 'A' => 5, 'B' => 10 },
         line_changing_cost: 8
       )
-      expect(plan).to eq([
-        [map.find_station('station1'), nil],
-        [map.find_station('station2'), 'A'],
-        [map.find_station('station3'), 'A'],
-        [map.find_station('station4'), 'A'],
-      ])
-      expect(time).to eq(15)
+      expect(results.map{|r| r[:plan].map(&:station_code) }).to eq([['A1', 'A2', 'A3', 'A4']])
+      expect(results.map{|r| r[:time]}).to eq([ 15 ])
     end
     it 'considers line changing cost' do
-      plan, time = router.time_route(
+      results = router.time_route(
         from: 'station1',
         to: 'station4',
         line_weight_map: { 'A' => 5, 'B' => 2 },
         line_changing_cost: 3
       )
-      expect(plan).to eq([
-        [map.find_station('station1'), nil],
-        [map.find_station('station2'), 'A'],
-        [map.find_station('station4'), 'B'],
-      ])
-      expect(time).to eq(10)
+      expect(results.map{|r| r[:plan].map(&:station_code) }).to eq([['A1', 'A2', 'B2', 'B4']])
+      expect(results.map {|r| r[:time]}).to eq([10])
     end
     it 'allows default weight by key `__default`' do
-      plan, time = router.time_route(
+      results = router.time_route(
         from: 'station1',
         to: 'station4',
         line_weight_map: { 'A' => 5, '__default' => 2 },
         line_changing_cost: 3
       )
-      expect(plan).to eq([
-        [map.find_station('station1'), nil],
-        [map.find_station('station2'), 'A'],
-        [map.find_station('station4'), 'B'],
-      ])
-      expect(time).to eq(10)
+      expect(results.map{|r| r[:plan].map(&:station_code) }).to eq([['A1', 'A2', 'B2', 'B4']])
+      expect(results.map {|r| r[:time]}).to eq([10])
     end
-    it 'returns [nil, nil] if no suitable route' do
+    it 'returns [] if no suitable route' do
       map.add('C', 1, 'unlinked')
-      plan, time = router.time_route(
+      results = router.time_route(
         from: 'station1',
         to: 'unlinked',
         line_weight_map: { 'A' => 5, 'B' => 10, 'C' => 1 },
         line_changing_cost: 8
       )
-      expect(plan).to be_nil
-      expect(time).to be_nil
+      expect(results).to eq([])
     end
   end
 end

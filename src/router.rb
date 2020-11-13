@@ -86,28 +86,42 @@ class Router
   private :create_bfs_path
 
   def time_route from:, to:, line_weight_map:, line_changing_cost:
-    from_station = find_station!(@station_map, from)
-    to_station = find_station!(@station_map, to)
+    from_stations = find_stations!(@station_map, from)
+    to_stations = find_stations!(@station_map, to)
 
-    dijkstra(from_station, to_station, line_weight_map, line_changing_cost)
+    results = []
+    from_stations.each do |from_st|
+      to_stations.each do |to_st|
+        plan, time = dijkstra(from_st, to_st, line_weight_map, line_changing_cost)
+        results << { time: time, plan: plan } if time
+      end
+    end
+
+    min_time = results.map{|r| r[:time]}.min
+
+    results.filter {|r| r[:time] == min_time}
   end
 
   def dijkstra from_station, to_station, line_weight_map, line_changing_cost
     d_map = {
-      from_station => { parent: nil, cost: 0, from_line: nil, finished: false }
+      from_station => { parent: nil, cost: 0, finished: false }
     }
 
     station = find_min_unprocessed_station(d_map)
     while station && !(d_map[to_station.name] && d_map[to_station.name][:finished])
       station_data = d_map[station]
-      station.connections.each do |c|
-        cost = calculate_cost(station_data, c.line_code, line_weight_map, line_changing_cost)
-        next if d_map[c.station] && d_map[c.station][:cost] < cost
+      station.neighbors.each do |neb_station|
+        cost = calculate_additional_cost(
+          station,
+          neb_station,
+          line_weight_map,
+          line_changing_cost
+        ) + station_data[:cost]
+        next if d_map[neb_station] && d_map[neb_station][:cost] < cost
 
-        d_map[c.station] = {
+        d_map[neb_station] = {
           parent: station,
           cost: cost,
-          from_line: c.line_code,
           finished: false
         }
       end
@@ -133,26 +147,25 @@ class Router
   end
   private :find_min_unprocessed_station
 
-  def calculate_cost current_station_data, via_line, line_weight_map, line_changing_cost
-    c = current_station_data[:cost] + (line_weight_map[via_line] || line_weight_map['__default'])
-    if current_station_data[:from_line] &&
-        current_station_data[:from_line] != via_line
-      c += line_changing_cost
+  def calculate_additional_cost current_station, neb_station, line_weight_map, line_changing_cost
+    if current_station.line_code != neb_station.line_code
+      line_changing_cost
+    else
+      line_weight_map[current_station.line_code] || line_weight_map['__default']
     end
-    c
   end
-  private :calculate_cost
+  private :calculate_additional_cost
 
-  def calculate_path d_map, station
+  def calculate_path d_map, to_station
     path = []
-    current_station = station
+    station = to_station
 
-    while current_station
-      current_data = d_map[current_station]
-      path.unshift([current_station, current_data[:from_line]])
-      current_station = current_data[:parent]
+    while station
+      current_data = d_map[station]
+      path.unshift(station)
+      station = current_data[:parent]
     end
     path
   end
-  private :calculate_cost
+  private :calculate_path
 end
