@@ -1,63 +1,65 @@
 require_relative './line_stop'
 
 class Station
-  attr_reader :name, :connections
+  attr_reader :name, :line_code, :line_number, :neighbors
 
   class Map
-    def add line_code, line_num, name, start_date
+    def initialize
+      @station_pool = {}
+    end
+
+    def add line_code, line_number, name, start_date = nil
       @station_pool ||= {}
 
-      line_stop = LineStop.new(line_code, line_num, start_date)
-      station = find_or_create_station(name)
-      station.add_line_stop(line_stop)
+      station = Station.new(name, line_code, line_number)
+      if @station_pool[name]
+        @station_pool[name].each do |st|
+          Station.connect(st, station) if st.line_code != station.line_code
+        end
+      end
+      add_to_pool(station)
       station
     end
 
-    def find_or_create_station name
-      @station_pool ||= {}
-
-      if !@station_pool[name]
-        @station_pool[name] = Station.new(name)
-      end
-      @station_pool[name]
+    def add_to_pool station
+      @station_pool[station.name] ||= []
+      @station_pool[station.name] << station
     end
-    private :find_or_create_station
+    private :add_to_pool
 
-    def find_station name
-      @station_pool[name]
+    def find_stations name
+      @station_pool[name] || []
     end
   end
 
-  Connection = Struct.new(:station, :line_code)
-
-  def self.connect station_a, station_b, line_code
-    station_a.add_connection(station_b, line_code)
-    station_b.add_connection(station_a, line_code)
+  def self.connect station_a, station_b
+    station_a.add_neigber(station_b)
+    station_b.add_neigber(station_a)
   end
 
-  def initialize name
+  def initialize name, line_code, line_number
     @name = name
-    @connections = []
-    @line_stops = []
+    @neighbors = []
+    @line_code = line_code
+    @line_number = line_number
   end
 
-  def add_connection station, line_code
-    existing_conn = @connections.find do |c|
-      c.line_code == line_code && c.station.name == station.name
+  def connections
+    @neighbors
+  end
+
+  def == another
+    line_code == another.line_code && line_number == another.line_number
+  end
+
+  def add_neigber station
+    existing_neighbor = @neighbors.find do |s|
+      s == station
     end
-    @connections << Connection.new(station, line_code) unless existing_conn
+    @neighbors << station unless existing_neighbor
   end
 
-  def add_line_stop stop
-    exists = @line_stops.find do |s|
-      s.line_code == stop.line_code && s.line_number == stop.line_number
-    end
-    @line_stops << stop unless exists
-  end
-
-  def station_code line_code
-    l = @line_stops.find {|l| l.line_code == line_code}
-    return nil unless l
-    "#{l.line_code}#{l.line_number}"
+  def station_code
+    "#{@line_code}#{@line_number}"
   end
 end

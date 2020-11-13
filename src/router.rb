@@ -18,35 +18,44 @@ class Router
     end
   end
 
-  SearchItem = Struct.new(:station, :line_code, :from_item)
+  SearchItem = Struct.new(:station, :from_item)
 
   def initialize station_map
     @station_map = station_map
   end
 
   def route from:, to:
-    from_station = find_station!(@station_map, from)
-    to_station = find_station!(@station_map, to)
+    from_stations = find_stations!(@station_map, from)
+    to_stations = find_stations!(@station_map, to)
 
-    hit_item = bfs(from_station, to_station)
-    return nil unless hit_item
+    plans = []
+    from_stations.each do |from_s|
+      to_stations.each do |to_s|
+        hit_item = bfs(from_s, to_s)
+        plans << create_bfs_path(hit_item) if hit_item
+      end
+    end
 
-    list_plan(hit_item)
+    min_len = plans.map(&:length).min
+    plans.select {|pl| pl.length == min_len}
   end
 
-  def find_station! map, name
-    s = map.find_station(name)
-    raise StationNotFound, "Station `#{name}` can not be found in the given map" unless s
+  def find_stations! map, name
+    s = map.find_stations(name)
+    if s.empty?
+      raise StationNotFound, "Station `#{name}` can not be found in the given map"
+    end
     s
   end
-  private :find_station!
+  private :find_stations!
 
   def bfs from_station, to_station
     searched_station_map = { from_station => true }
     q = SearchQueue.new
+
     hit = nil
 
-    q.enqueue(SearchItem.new(from_station, nil, nil))
+    q.enqueue(SearchItem.new(from_station, nil))
     while q.has_item?
       item = q.dequeue
       if item.station == to_station
@@ -54,12 +63,10 @@ class Router
         break
       end
 
-      item.station.connections.each do |conn|
-        neb_station = conn.station
-        line_code = conn.line_code
+      item.station.neighbors.each do |neb_station|
         next if searched_station_map[neb_station]
         searched_station_map[neb_station] = true
-        q.enqueue(SearchItem.new(neb_station, line_code, item))
+        q.enqueue(SearchItem.new(neb_station, item))
       end
     end
 
@@ -67,16 +74,16 @@ class Router
   end
   private :bfs
 
-  def list_plan hit_item
+  def create_bfs_path hit_item
     plan = []
     item = hit_item
     while item
-      plan.unshift([item.station, item.line_code])
+      plan.unshift(item.station)
       item = item.from_item
     end
     plan
   end
-  private :list_plan
+  private :create_bfs_path
 
   def time_route from:, to:, line_weight_map:, line_changing_cost:
     from_station = find_station!(@station_map, from)
