@@ -103,9 +103,7 @@ class Router
   end
 
   def dijkstra from_station, to_station, line_weight_map, line_changing_cost
-    d_map = {
-      from_station => { parent: nil, cost: 0, finished: false }
-    }
+    d_map = {from_station => { parent: nil, cost: 0, finished: false }}
 
     station = find_min_unprocessed_station(d_map)
     while station && !(d_map[to_station.name] && d_map[to_station.name][:finished])

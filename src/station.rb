@@ -1,5 +1,3 @@
-require_relative './line_stop'
-
 class Station
   attr_reader :name, :line_code, :line_number, :neighbors
 
