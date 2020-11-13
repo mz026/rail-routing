@@ -79,9 +79,6 @@ class Router
   private :list_plan
 
   def time_route from:, to:, line_weight_map:, line_changing_cost:
-    if route(from: from, to: to).nil?
-      return [nil, nil]
-    end
     from_station = find_station!(@station_map, from)
     to_station = find_station!(@station_map, to)
 
@@ -111,10 +108,14 @@ class Router
       station = find_min_unprocessed_station(d_map)
     end
 
-    [
-      calculate_path(d_map, to_station),
-      d_map[to_station][:cost]
-    ]
+    if d_map[to_station] && d_map[to_station][:finished]
+      [
+        calculate_path(d_map, to_station),
+        d_map[to_station][:cost]
+      ]
+    else
+      [ nil, nil ]
+    end
   end
   private :dijkstra
 
