@@ -1,33 +1,34 @@
 #!/usr/bin/env ruby
-# usage: ./bin/route 'Holland Village' 'Bugis'
+# usage: ./bin/time_route 'Boon Lay' 'Little India' '2020-11-13T19:00'
 
 require_relative '../src/map_builder'
 require_relative '../src/router'
+require_relative '../src/time_config'
+require_relative '../src/plan_viewer'
 require 'csv'
+require 'time'
 
 from = ARGV[0]
 to = ARGV[1]
+time_str = ARGV[2]
 
 arr = CSV.parse(File.read('./assets/StationMap.csv'))[1..-1]
 
-map = MapBuilder.new.build(arr)
+current_time = Time.parse(time_str)
+config = TimeConfig.config(current_time)
+
+map = MapBuilder.new.build(
+  arr,
+  current_time: current_time,
+  excluded_lines: config[:excluded_lines]
+)
 
 router = Router.new(map)
 plan, time = router.time_route(
   from: from,
   to: to,
-  line_weight_map: {
-    'NS' => 12,
-    'NE' => 12,
-    '__default' => 10,
-  },
-  line_changing_cost: 15
+  line_weight_map: config[:line_weight_map],
+  line_changing_cost: config[:line_changing_cost]
 )
 
-puts "time: #{time}"
-plan.each_with_index do |st, i|
-  station, line_code = st
-  line_code = plan[i + 1][1] unless line_code
-
-  puts "#{station.name}(#{station.station_code(line_code)})"
-end
+PlanViewer.print_on_console(plan, time)

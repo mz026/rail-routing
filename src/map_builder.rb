@@ -1,3 +1,4 @@
+require 'time'
 require_relative './station'
 
 class MapBuilder
@@ -5,10 +6,12 @@ class MapBuilder
     @last_line_station = {}
   end
 
-  def build arr
+  def build arr, current_time: nil, excluded_lines: []
     map = Station::Map.new
 
     arr.each do |code, name, date|
+      next if excluded?(code, date, current_time, excluded_lines)
+
       line_code, line_number = parse_code(code)
       station = map.add(line_code, line_number, name, date)
       last_station = get_last_build_station(line_code)
@@ -18,6 +21,12 @@ class MapBuilder
 
     map
   end
+
+  def excluded? line_code, date, current_time, excluded_lines
+    excluded_lines.include?(line_code) ||
+      (current_time && current_time < Time.parse(date))
+  end
+  private :excluded?
 
   def register_build_station line_code, st
     @last_line_station[line_code] = st
