@@ -1,6 +1,12 @@
 module PlanViewer
+  NOT_FOUND_MSG = "No suitable route can be found. 😢😢"
   class << self
     def print_time_routes results
+      if results.empty?
+        puts NOT_FOUND_MSG
+        return
+      end
+
       results.each do |res|
         puts "Time: #{res[:time]}"
         print_plan(res[:plan])
@@ -8,6 +14,11 @@ module PlanViewer
     end
 
     def print_route plans
+      if plans.empty?
+        puts NOT_FOUND_MSG
+        return
+      end
+
       plans.each {|pl| print_plan(pl)}
     end
 

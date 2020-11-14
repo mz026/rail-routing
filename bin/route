@@ -14,6 +14,11 @@ arr = CSV.parse(File.read('./assets/StationMap.csv'))[1..-1]
 map = MapBuilder.new.build(arr)
 
 router = Router.new(map)
-plans = router.route(from: from, to: to)
+begin
+  plans = router.route(from: from, to: to)
+  PlanViewer.print_route(plans)
+rescue Router::StationNotFound => e
+  puts "⚠️  The given station `#{e.name}` can not be found."
+  exit 1
+end
 
-PlanViewer.print_route(plans)

@@ -24,11 +24,17 @@ map = MapBuilder.new.build(
 )
 
 router = Router.new(map)
-results = router.time_route(
-  from: from,
-  to: to,
-  line_weight_map: config[:line_weight_map],
-  line_changing_cost: config[:line_changing_cost]
-)
 
-PlanViewer.print_time_routes(results)
+begin
+  results = router.time_route(
+    from: from,
+    to: to,
+    line_weight_map: config[:line_weight_map],
+    line_changing_cost: config[:line_changing_cost]
+  )
+
+  PlanViewer.print_time_routes(results)
+rescue Router::StationNotFound => e
+  puts "⚠️  The given station `#{e.name}` can not be found or does not operate at the given time."
+  exit 1
+end

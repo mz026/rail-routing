@@ -1,6 +1,13 @@
 class Router
-  class StationNotFound < StandardError; end
-  class SearchQueue
+  class StationNotFound < StandardError
+    attr_reader :name
+    def initialize name
+      super("Station `#{name}` can not be found")
+      @name = name
+    end
+  end
+
+  class BFSSearchQueue
     def initialize
       @q = []
     end
@@ -18,7 +25,7 @@ class Router
     end
   end
 
-  SearchItem = Struct.new(:station, :from_item)
+  BFSSearchItem = Struct.new(:station, :from_item)
 
   def initialize station_map
     @station_map = station_map
@@ -43,7 +50,7 @@ class Router
   def find_stations! map, name
     s = map.find_stations(name)
     if s.empty?
-      raise StationNotFound, "Station `#{name}` can not be found in the given map"
+      raise StationNotFound, name
     end
     s
   end
@@ -51,11 +58,11 @@ class Router
 
   def bfs from_station, to_station
     searched_station_map = { from_station => true }
-    q = SearchQueue.new
+    q = BFSSearchQueue.new
 
     hit = nil
 
-    q.enqueue(SearchItem.new(from_station, nil))
+    q.enqueue(BFSSearchItem.new(from_station, nil))
     while q.has_item?
       item = q.dequeue
       if item.station == to_station
@@ -66,7 +73,7 @@ class Router
       item.station.neighbors.each do |neb_station|
         next if searched_station_map[neb_station]
         searched_station_map[neb_station] = true
-        q.enqueue(SearchItem.new(neb_station, item))
+        q.enqueue(BFSSearchItem.new(neb_station, item))
       end
     end
 
