@@ -12,17 +12,27 @@ from = ARGV[0]
 to = ARGV[1]
 time_str = ARGV[2]
 
+if ! (from && to && time_str)
+  puts "usage: ./bin/time_route '<from_station>' '<to_station>' '<YYYY-mm-ddTHH:MM>'"
+  puts "example: ./bin/time_route 'Boon Lay' 'Little India' '2020-11-13T19:00'"
+  exit 1
+end
+
+begin
+  current_time = Time.strptime(time_str, '%Y-%m-%dT%H:%M')
+rescue ArgumentError => e
+  puts "Invalid time was given, please give it in the format like `2020-11-13T19:00`"
+  exit
+end
+
 arr = CSV.parse(File.read('./assets/StationMap.csv'))[1..-1]
 
-current_time = Time.parse(time_str)
 config = TimeConfig.config(current_time)
-
 map = MapBuilder.new.build(
   arr,
   current_time: current_time,
   excluded_lines: config[:excluded_lines]
 )
-
 router = Router.new(map)
 
 begin
@@ -33,7 +43,7 @@ begin
     line_changing_cost: config[:line_changing_cost]
   )
 
-  PlanViewer.print_time_routes(results)
+  PlanViewer.print_time_routes(results, current_time)
 rescue Router::StationNotFound => e
   puts "⚠️  The given station `#{e.name}` can not be found or does not operate at the given time."
   exit 1

@@ -9,10 +9,14 @@ require 'csv'
 from = ARGV[0]
 to = ARGV[1]
 
+if ! (from && to)
+  puts "usage: ./bin/route '<from_station>' '<to_station>'"
+  puts "example: ./bin/route 'Holland Village' 'Bugis'"
+  exit 1
+end
+
 arr = CSV.parse(File.read('./assets/StationMap.csv'))[1..-1]
-
 map = MapBuilder.new.build(arr)
-
 router = Router.new(map)
 begin
   plans = router.route(from: from, to: to)
