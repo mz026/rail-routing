@@ -6,7 +6,7 @@
 
 This is a command-line application built with Ruby. Please:
 
-1. Make sure you have Ruby 2.6.6 installed in your environment.
+1. Make sure you have Ruby 2.6.6, Bundler v2.1.4 installed in your environment. (You may need to do `gem install bundler:2.1.4`)
 2. Install required dependencies with Bundler by:
 
 ```
