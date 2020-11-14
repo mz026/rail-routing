@@ -1,5 +1,7 @@
 # SG Urban Rail Routing
 
+[![CircleCI](https://circleci.com/gh/mz026/rail-routing.svg?style=svg)](https://circleci.com/gh/mz026/rail-routing)
+
 ## Before using it:
 
 This is a command-line application built with Ruby. Please:
