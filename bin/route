@@ -14,6 +14,6 @@ arr = CSV.parse(File.read('./assets/StationMap.csv'))[1..-1]
 map = MapBuilder.new.build(arr)
 
 router = Router.new(map)
-plan = router.route(from: from, to: to)
+plans = router.route(from: from, to: to)
 
-PlanViewer.print_on_console(plan)
+PlanViewer.print_route(plans)

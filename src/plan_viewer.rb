@@ -1,12 +1,21 @@
 module PlanViewer
-  def self.print_on_console plan, time = nil
-    puts "Total time required: #{time}\n\n" if time
-
-    plan.each_with_index do |st, i|
-      station, line_code = st
-      line_code = plan[i + 1][1] unless line_code
-
-      puts "#{station.name}(#{station.station_code(line_code)})"
+  class << self
+    def print_time_routes results
+      results.each do |res|
+        puts "Time: #{res[:time]}"
+        print_plan(res[:plan])
+      end
     end
+
+    def print_route plans
+      plans.each {|pl| print_plan(pl)}
+    end
+
+    def print_plan plan
+      plan.each_with_index do |station|
+        puts "#{station.name}(#{station.station_code})"
+      end
+    end
+    private :print_plan
   end
 end

@@ -24,11 +24,11 @@ map = MapBuilder.new.build(
 )
 
 router = Router.new(map)
-plan, time = router.time_route(
+results = router.time_route(
   from: from,
   to: to,
   line_weight_map: config[:line_weight_map],
   line_changing_cost: config[:line_changing_cost]
 )
 
-PlanViewer.print_on_console(plan, time)
+PlanViewer.print_time_routes(results)

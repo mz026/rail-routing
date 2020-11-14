@@ -15,7 +15,7 @@ class MapBuilder
       line_code, line_number = parse_code(code)
       station = map.add(line_code, line_number, name, date)
       last_station = get_last_build_station(line_code)
-      Station.connect(station, last_station, line_code) if last_station
+      Station.connect(station, last_station) if last_station
       register_build_station(line_code, station)
     end
 
