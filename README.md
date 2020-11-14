@@ -23,11 +23,11 @@ bundle exec rspec spec/
 
 This application provides two functionalities:
 
-- Suggest the routes from two stations.
-- Suggest the routes from two stations with travelling time considered.
+- Suggest the routes between two stations.
+- Suggest the routes between two stations with travelling time considered.
 
 
-### Suggest the routes from two stations.
+### Suggest the routes between two stations.
 
 Run it by:
 
@@ -59,7 +59,7 @@ Take DT from Rochor(DT13) to Bugis(DT14)
 Arrived!! 🥳🥳🥳
 ```
 
-### Suggest the routes from two stations with travelling time considered.
+### Suggest the routes between two stations with travelling time considered.
 
 Run it by:
 
@@ -103,17 +103,17 @@ Arrived!! 🥳🥳🥳
 
 The application is architected into three layers. The underlying layers are not aware of the upper layers.
 
-- Config/Application layer: This layer translates the user input and the assets into the desired data, and feed them into the Algorithm layer.
-- Algorithm layer: This layer makes use of the underlying graph data structure and perform the algorithms needed to solve the problems. `Router` class belongs to this layer.
-- Data structure layer: This layer consist of `Station` class. Which represents the graph data structed needed by the algorithm.
+- Config/Application layer: This layer translates the user input and the assets into the desired data and feeds them into the Algorithm layer.
+- Algorithm layer: This layer uses the underlying graph data structure and performs the algorithms needed to solve the problems. `Router` class belongs to this layer.
+- Data structure layer: This layer consists of `Station` class, representing the graph data structure needed by the algorithm.
 
 ![](assets/layers.jpg)
 
 ## Algorithms
-The whole application is modeled as a [shortest-path problem](https://en.wikipedia.org/wiki/Shortest_path_problem). I use Breadth First Search (BFS) to solve the un-timed problem and Dijkstra Algorithm to solve the timed problem.
+The whole application is modeled as a [shortest-path problem](https://en.wikipedia.org/wiki/Shortest_path_problem). I use Breadth-First Search (BFS) to solve the un-timed problem and Dijkstra Algorithm to solve the timed problem.
 
-- In the un-timed routing problem, the goal of BFS is to find the path with least station travels.
-- In the timed routing problem, the goal of Dijkstra Algorithm is to find the path with the least traveling time. The times it takes to travel between each station and exchange lines are modeled as the `weight` in the algorithm.
+- In the un-timed routing problem, the goal of BFS is to find the path with the least station travels.
+- In the timed routing problem, the goal of the Dijkstra Algorithm is to find the path with the least travelling time. The times it takes to travel between each station and exchange lines are modeled as the `weight` in the algorithm.
 
 ## API & Details
 
